@@ -1,0 +1,21 @@
+<head>
+  <title>Redis Autorun Issue</title>
+</head>
+
+<body>
+  <h1>Redis oplog + SS autorun issue</h1>
+  {{> main}}
+</body>
+
+<template name="main">
+  <h5>Redis Oplog {{#if useRedisOplog}}<span style="color: green">Enabled</span>{{else}}<span style="color: red">Disabled</span>{{/if}}</h5>
+  <h5>{{userCount}} users</h5>
+  <button class="js-add-member">Add 100 Members</button>
+  <button class="js-reset-workspace">Reset Workspace</button>
+  <button class="js-redis-oplog-toggle">{{#if useRedisOplog}}Disable Redis Oplog{{else}}Enable Redis Oplog{{/if}}</button>
+  <ul>
+  {{#each users}}
+    <li>{{this._id}}</li>
+  {{/each}}
+  </ul>
+</template>
