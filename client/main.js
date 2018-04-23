@@ -6,6 +6,7 @@ import { Workspaces, addMember, resetWorkspace } from '../workspaces';
 import './main.html';
 
 Template.main.onCreated(function mainOnCreated() {
+  // boolean for whether or not our sub is using redis oplog
   this.useRedisOplog = new ReactiveVar(true);
 
   this.autorun(() => {

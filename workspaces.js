@@ -4,6 +4,7 @@ import { Random } from 'meteor/random'
 
 export const Workspaces = new Mongo.Collection('workspaces');
 
+// create new user andd add to workspace
 export const addMember = new ValidatedMethod({
   name: 'workspace.addMember',
   validate: null,
@@ -17,14 +18,15 @@ export const addMember = new ValidatedMethod({
   },
 });
 
+// clear out all users and clear out workspace members
 export const resetWorkspace = new ValidatedMethod({
   name: 'workspace.reset',
   validate: null,
   run() {
     if (Meteor.isServer) {
-      Users.remove({});
       const workspace = Workspaces.findOne();
       Workspaces.update(workspace._id, { $set: { members: [] }});
+      Users.remove({});
     }
   }
 });

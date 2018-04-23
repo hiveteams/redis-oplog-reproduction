@@ -3,7 +3,6 @@ import { Users } from '../users';
 import { Workspaces } from '../workspaces';
 import { Random } from 'meteor/random'
 
-// Seed with default item
 Meteor.startup(() => {
   const workspace = Workspaces.findOne();
   // make sure a workspace exists
@@ -12,6 +11,7 @@ Meteor.startup(() => {
   }
 });
 
+// Publish all workspace users
 Meteor.publish('allUsers', function allUsersPub(enableRedisOplog) {
   this.autorun(() => {
     // listen to changes in the workspace document

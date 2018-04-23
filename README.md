@@ -1,65 +1,52 @@
 # Redis Oplog + Server side autorun issue
 
-## Starting server and causing the issue
+## Steps to reproduce
 1. Run `meteor npm i`
 2. Start the server with `npm start`
 3. Load localhost:3000
-4. Click to toggle the document's deleted state
+4. Make sure redis oplog is enabled
+5. Click to add 100 users (might have to do this more than once)
+6. Notice that the users are not cleanly added, several 'removed' events are sent through ddp.
+7. Toggle to disable redis oplog
+8. Click to add 100 users again
+9. Notice that users are cleanly added, no removed events are sent through ddp.
 
-You'll receive the error every time the item is removed from matching the publication.
+## Workspace
 
-
-## Context
-If you subscribe to 2 different publications that return the same document, where 1 publication uses a server side autorun from [peerlibrary:server-autorun](https://github.com/peerlibrary/meteor-server-autorun) or [peerlibrary:reactive-publish](https://github.com/peerlibrary/meteor-reactive-publish) which does multiple `find`s of the same document, you'll receive an error when the item is removed from the publication:
-
-```
-I20180421-15:12:21.802(-4)? Exception in callback of async function: Error: Removed nonexistent document dEKXyFJdbn9DYA7Sf
-I20180421-15:12:21.803(-4)?     at SessionCollectionView.removed (packages/ddp-server/livedata_server.js:202:17)
-I20180421-15:12:21.803(-4)?     at Session.removed (packages/ddp-server/livedata_server.js:394:10)
-I20180421-15:12:21.803(-4)?     at Subscription.removed (packages/ddp-server/livedata_server.js:1292:19)
-I20180421-15:12:21.803(-4)?     at Object.removed (packages/mongo/collection.js:368:13)
-I20180421-15:12:21.803(-4)?     at Object.removed (packages/cultofcoders:redis-oplog/lib/mongo/extendObserveChanges.js:100:26)
-I20180421-15:12:21.803(-4)?     at currentObservers.forEach.observer (packages/cultofcoders:redis-oplog/lib/cache/PublicationEntry.js:141:38)
-I20180421-15:12:21.804(-4)?     at Array.forEach (<anonymous>)
-I20180421-15:12:21.804(-4)?     at PublicationEntry.send (packages/cultofcoders:redis-oplog/lib/cache/PublicationEntry.js:140:34)
-I20180421-15:12:21.804(-4)?     at ObservableCollection.send (packages/cultofcoders:redis-oplog/lib/cache/ObservableCollection.js:163:23)
-I20180421-15:12:21.804(-4)?     at ObservableCollection.remove (packages/cultofcoders:redis-oplog/lib/cache/ObservableCollection.js:253:18)
-I20180421-15:12:21.804(-4)?     at handleUpdate (packages/cultofcoders:redis-oplog/lib/processors/direct.js:51:34)
-I20180421-15:12:21.804(-4)?     at packages/cultofcoders:redis-oplog/lib/processors/direct.js:12:13
-I20180421-15:12:21.805(-4)?     at RedisSubscriber.process (packages/cultofcoders:redis-oplog/lib/redis/RedisSubscriber.js:51:24)
-I20180421-15:12:21.805(-4)?     at subscribers.forEach.redisSubscriber (packages/cultofcoders:redis-oplog/lib/redis/RedisSubscriptionManager.js:143:33)
-I20180421-15:12:21.805(-4)?     at Array.forEach (<anonymous>)
-I20180421-15:12:21.805(-4)?     at RedisSubscriptionManager.process (packages/cultofcoders:redis-oplog/lib/redis/RedisSubscriptionManager.js:142:25)
-I20180421-15:12:21.805(-4)?     at events.forEach.event (packages/cultofcoders:redis-oplog/lib/mongo/lib/dispatchers.js:28:42)
-I20180421-15:12:21.805(-4)?     at Array.forEach (<anonymous>)
-I20180421-15:12:21.806(-4)?     at RedisSubscriptionManager.queue.queueTask.Meteor.bindEnvironment (packages/cultofcoders:redis-oplog/lib/mongo/lib/dispatchers.js:22:22)
-I20180421-15:12:21.806(-4)?     at runWithEnvironment (packages/meteor.js:1238:24)
-I20180421-15:12:21.806(-4)?     at Object.task (packages/meteor.js:1251:14)
-I20180421-15:12:21.806(-4)?     at Meteor._SynchronousQueue.SQp._run (packages/meteor.js:869:16)
+```json
+{
+  "_id": "Mongo id",
+  "members": "List of user ids"
+}
 ```
 
-The code to cause this is pretty straightforward:
-
+## User
+```json
+{
+  "_id": "Mongo id"
+}
 ```
-Meteor.publish('allItems', function allItemsPublish() {
-  return Items.find({ deleted: false });
-});
 
-Meteor.publish('singleItem', function singleItemPublish() {
-  const pub = this;
+## The Code
 
-  pub.autorun(() => {
-    // The `findOne` below causes the error to throw.
-    const item = Items.findOne(defaultItem._id);
-    // Would usually run some logic on `item` here using collection helpers
-    // and use that to decide what else or what fields we'd want to publish.
-    return Items.find({ _id: defaultItem._id, deleted: false });
+Basically just a publish where we depend on the results of the workspaces query to return the final set of users:
+
+```javascript
+Meteor.publish('allUsers', function allUsersPub(enableRedisOplog) {
+  this.autorun(() => {
+    // listen to changes in the workspace document
+    const workspace = Workspaces.find().fetch()[0];
+
+    // optionally disable redis oplog
+    const options = {};
+    if (!enableRedisOplog) {
+      options.disableOplog = true;
+    }
+
+    // return users cursor
+    return Users.find({
+      _id: { $in: workspace.members }
+    }, options);
   });
 });
 ```
-
-## Why this matters
-This example is contrived, but our codebase has tons of logic that uses server side autoruns like this to do things like:
-
-- Use collection helpers to decide what fields will/will not show for a given user (permissions type stuff)
-- Use document data to decide if we want to publish additional cursors from other collections (list views vs detail views)# redis-oplog-reproduction
