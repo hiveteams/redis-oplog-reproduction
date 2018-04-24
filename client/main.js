@@ -1,8 +1,8 @@
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 
-import { Users } from '../users';
-import { Workspaces, addMember, resetWorkspace } from '../workspaces';
+import { Views } from '../views';
+import { Projects, createNewProject, resetProjects } from '../projects';
 import './main.html';
 
 Template.main.onCreated(function mainOnCreated() {
@@ -10,17 +10,23 @@ Template.main.onCreated(function mainOnCreated() {
   this.useRedisOplog = new ReactiveVar(true);
 
   this.autorun(() => {
-    // subscribe to all users
-    this.subscribe('allUsers', this.useRedisOplog.get());
+    // subscribe to all views
+    this.subscribe('views', this.useRedisOplog.get());
   });
 });
 
 Template.main.helpers({
-  users() {
-    return Users.find();
+  projects() {
+    return Projects.find();
   },
-  userCount() {
-    return Users.find().count();
+  projectsCount() {
+    return Projects.find().count();
+  },
+  views() {
+    return Views.find();
+  },
+  viewsCount() {
+    return Views.find().count();
   },
   useRedisOplog() {
     return Template.instance().useRedisOplog.get();
@@ -28,19 +34,15 @@ Template.main.helpers({
 });
 
 Template.main.events({
-  'click .js-add-member'(event) {
-    event.preventDefault();
-    for(var i = 0; i < 100; i++) {
-      addMember.call();
-    }
-  },
-  'click .js-reset-workspace'(event) {
-    event.preventDefault();
-    resetWorkspace.call();
-  },
   'click .js-redis-oplog-toggle'(event, instance) {
     const useRedisOplog = instance.useRedisOplog.get()
     instance.useRedisOplog.set(!useRedisOplog);
-  }
+  },
+  'click .js-new-project'() {
+    createNewProject.call();
+  },
+  'click .js-reset'() {
+    resetProjects.call();
+  },
 });
 

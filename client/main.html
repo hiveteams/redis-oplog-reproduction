@@ -9,13 +9,19 @@
 
 <template name="main">
   <h5>Redis Oplog {{#if useRedisOplog}}<span style="color: green">Enabled</span>{{else}}<span style="color: red">Disabled</span>{{/if}}</h5>
-  <h5>{{userCount}} users</h5>
-  <button class="js-add-member">Add 100 Members</button>
-  <button class="js-reset-workspace">Reset Workspace</button>
+  <button class="js-new-project">Create a new project</button>
   <button class="js-redis-oplog-toggle">{{#if useRedisOplog}}Disable Redis Oplog{{else}}Enable Redis Oplog{{/if}}</button>
+  <button class="js-reset">Reset</button>
+  <h5>{{viewsCount}} views</h5>
   <ul>
-  {{#each users}}
-    <li>{{this._id}}</li>
+  {{#each views}}
+    <li>id: {{this._id}}, projectId: {{this.projectId}}</li>
+  {{/each}}
+  </ul>
+  <h5>{{projectsCount}} projects</h5>
+  <ul>
+  {{#each projects}}
+    <li>id: {{this._id}}</li>
   {{/each}}
   </ul>
 </template>
