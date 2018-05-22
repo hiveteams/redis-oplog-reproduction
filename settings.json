@@ -6,10 +6,10 @@
     },
     "retryIntervalMs": 10000,
     "mutationDefaults": {
-        "optimistic": true,
-        "pushToRedis": true
+      "optimistic": true,
+      "pushToRedis": true
     },
-    "debug": true,
+    "debug": false,
     "overridePublishFunction": true
   }
 }

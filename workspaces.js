@@ -10,10 +10,10 @@ export const addMember = new ValidatedMethod({
   validate: null,
   run() {
     if (Meteor.isServer) {
-      const userId = Users.insert({ _id: Random.id() });
+      const userId = Users.insert({ _id: Random.id(), createdAt: new Date() });
       const workspace = Workspaces.findOne();
       const members = _.union(workspace.members, [userId]);
-      Workspaces.update(workspace._id, { $addToSet: { members: userId }});
+      Workspaces.update(workspace._id, { $addToSet: { members: userId } });
     }
   },
 });
@@ -25,7 +25,7 @@ export const resetWorkspace = new ValidatedMethod({
   run() {
     if (Meteor.isServer) {
       const workspace = Workspaces.findOne();
-      Workspaces.update(workspace._id, { $set: { members: [] }});
+      Workspaces.update(workspace._id, { $set: { members: [] } });
       Users.remove({});
     }
   }

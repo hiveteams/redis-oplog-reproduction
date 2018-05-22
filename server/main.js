@@ -23,6 +23,10 @@ Meteor.publish('allUsers', function allUsersPub(enableRedisOplog) {
       options.disableOplog = true;
     }
 
+    // options.skip = 1;
+    // options.limit = 1;
+    // options.sort = { createdAt: 1 };
+
     // return users cursor
     return Users.find({
       _id: { $in: workspace.members }

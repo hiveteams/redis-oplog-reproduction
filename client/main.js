@@ -30,7 +30,7 @@ Template.main.helpers({
 Template.main.events({
   'click .js-add-member'(event) {
     event.preventDefault();
-    for(var i = 0; i < 100; i++) {
+    for (var i = 0; i < 100; i++) {
       addMember.call();
     }
   },
