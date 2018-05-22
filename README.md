@@ -1,15 +1,30 @@
 # Redis Oplog + Server side autorun issue
 
 ## Steps to reproduce
+
+To see the bug
 1. Run `meteor npm i`
 2. Start the server with `npm start`
 3. Load localhost:3000
 4. Make sure redis oplog is enabled
-5. Click to add 100 users (might have to do this more than once)
-6. Notice that the users are not cleanly added, several 'removed' events are sent through ddp.
-7. Toggle to disable redis oplog
-8. Click to add 100 users again
-9. Notice that users are cleanly added, no removed events are sent through ddp.
+5. Notice log lines
+
+```
+I20180522-16:44:10.208(-4)? workspaces canUseOplog 1 false
+I20180522-16:44:10.209(-4)? [ 'changed', 'removed', 'addedBefore', 'movedBefore' ]
+I20180522-16:44:10.216(-4)? users canUseOplog 1 true
+I20180522-16:44:10.220(-4)? users canUseOplog 1 false
+```
+
+Now without redis, comment out cultofcoders:redis-oplog and disable-oplog in packages:
+
+Repeat above steps and notice that the returned users cursor does use oplog
+
+```
+I20180522-16:43:56.045(-4)? workspaces canUseOplog 1 false
+I20180522-16:43:56.045(-4)? [ 'changed', 'removed', 'addedBefore', 'movedBefore' ]
+I20180522-16:43:56.048(-4)? users canUseOplog 1 true
+```
 
 ## Workspace
 
