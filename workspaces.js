@@ -4,6 +4,7 @@ import { Random } from 'meteor/random'
 export const Workspaces = new Mongo.Collection('workspaces');
 
 // create new user andd add to workspace
+
 export const addMember = new ValidatedMethod({
   name: 'workspace.addMember',
   validate: null,
