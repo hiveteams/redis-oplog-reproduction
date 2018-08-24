@@ -22,4 +22,4 @@ shell-server@0.3.1            # Server-side component of the `meteor shell` comm
 
 peerlibrary:reactive-publish
 mdg:validated-method
-peerlibrary:server-autorun
+peerlibrary:server-autorun # Test comment with info
