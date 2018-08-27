@@ -2,6 +2,7 @@ import { Mongo } from 'meteor/mongo';
 import { Users } from './users';
 import { Random } from 'meteor/random'
 export const Workspaces = new Mongo.Collection('workspaces');
+
 // wow
 
 // create new user andd add to workspace
